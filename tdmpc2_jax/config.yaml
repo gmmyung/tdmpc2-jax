@@ -13,7 +13,7 @@ env:
   backend: raisim
   env_id: test
   num_envs: 4
-  utd_ratio: 0.5
+  utd_ratio: 1
   asynchronous: True
 
   raisim: 

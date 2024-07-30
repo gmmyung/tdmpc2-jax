@@ -50,7 +50,7 @@ class Raisim(gym.Env):
         obs = self.env.observe().astype(np.float32)[0]
         info = {}
         info["success"] = not term
-        return obs, reward, term, False, info
+        return obs, reward, False, False, info
 
     def close(self):
         if self.cfg.visualize_seed == self.seed:
