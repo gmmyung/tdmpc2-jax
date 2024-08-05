@@ -90,14 +90,19 @@ def train(cfg: dict):
     ##############################
     dtype = jnp.dtype(model_config.dtype)
     rng, model_key, encoder_key = jax.random.split(rng, 3)
-    mlp_encoder = nn.Sequential([
-        NormedLinear(encoder_config.encoder_dim, activation=mish, dtype=dtype)
-        for _ in range(encoder_config.num_encoder_layers-1)] + [
-        NormedLinear(
-            model_config.latent_dim,
-            activation=partial(simnorm, simplex_dim=model_config.simnorm_dim),
-            dtype=dtype)
-    ])
+    mlp_encoder = nn.Sequential(
+        [
+            NormedLinear(encoder_config.encoder_dim, activation=mish, dtype=dtype)
+            for _ in range(encoder_config.num_encoder_layers - 1)
+        ]
+        + [
+            NormedLinear(
+                model_config.latent_dim,
+                activation=partial(simnorm, simplex_dim=model_config.simnorm_dim),
+                dtype=dtype,
+            )
+        ]
+    )
     image_encoder = ImageEncoder(
         64,
         activation=partial(simnorm, simplex_dim=model_config.simnorm_dim),
@@ -113,13 +118,15 @@ def train(cfg: dict):
         dtype=dtype,
     )
 
-
     if encoder_config.tabulate:
         print("Encoder")
         print("--------------")
         print(
             encoder_module.tabulate(
-                jax.random.key(0), env.observation_space["state"].sample(), env.observation_space["pixels"].sample(), compute_flops=True
+                jax.random.key(0),
+                env.observation_space["state"].sample(),
+                env.observation_space["pixels"].sample(),
+                compute_flops=True,
             )
         )
 
@@ -148,7 +155,9 @@ def train(cfg: dict):
     encoder = TrainState.create(
         apply_fn=encoder_module.apply,
         params=encoder_module.init(
-            {"params": encoder_param_key, "augment": encoder_augment_key}, dummy_obs["state"], dummy_obs["pixels"]
+            {"params": encoder_param_key, "augment": encoder_augment_key},
+            dummy_obs["state"],
+            dummy_obs["pixels"],
         )["params"],
         tx=optax.chain(
             optax.zero_nans(),
@@ -243,7 +252,9 @@ def train(cfg: dict):
             for ienv, trunc in enumerate(truncated):
                 if trunc:
                     for k in real_next_observation.keys():
-                        real_next_observation[k][ienv] = info["final_observation"][ienv][k]
+                        real_next_observation[k][ienv] = info["final_observation"][
+                            ienv
+                        ][k]
             replay_buffer.insert(
                 dict(
                     observation=observation,
@@ -281,7 +292,7 @@ def train(cfg: dict):
                         global_step + ienv,
                     )
                     ep_count[ienv] += 1
-            
+
             if global_step >= seed_steps:
                 if global_step == seed_steps:
                     print("Pre-training on seed data...")

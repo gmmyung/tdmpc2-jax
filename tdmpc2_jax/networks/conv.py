@@ -105,6 +105,7 @@ class ImageEncoder(nn.Module):
             x = self.activation(x)
         return x
 
+
 class MultiModalEncoder(nn.Module):
     image_encoder: nn.Module
     mlp_encoder: nn.Module
@@ -121,7 +122,9 @@ class MultiModalEncoder(nn.Module):
         x = jnp.concatenate([x, im], axis=-1)
         x = NormedLinear(features=self.fuse_dim, activation=mish, dtype=self.dtype)(x)
         x = NormedLinear(features=self.fuse_dim, activation=mish, dtype=self.dtype)(x)
-        x = NormedLinear(features=self.latent_dim, activation=self.activation, dtype=self.dtype)(x)
+        x = NormedLinear(
+            features=self.latent_dim, activation=self.activation, dtype=self.dtype
+        )(x)
         if self.activation is not None:
             x = self.activation(x)
         return x

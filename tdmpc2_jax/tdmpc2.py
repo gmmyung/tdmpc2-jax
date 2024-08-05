@@ -98,7 +98,9 @@ class TDMPC2(struct.PyTreeNode):
     ):
         encoder_key, key = jax.random.split(key, 2)
 
-        z = self.model.encode(obs["state"], obs["pixels"], self.model.encoder.params, encoder_key)
+        z = self.model.encode(
+            obs["state"], obs["pixels"], self.model.encoder.params, encoder_key
+        )
 
         if self.mpc:
             num_envs = z.shape[0] if z.ndim > 1 else 1
@@ -273,7 +275,12 @@ class TDMPC2(struct.PyTreeNode):
             finished = jnp.zeros((self.horizon + 1, self.batch_size), dtype=bool)
 
             next_z = sg(
-                self.model.encode(next_observations, next_pixel_observations, encoder_params, key=encoder_key)
+                self.model.encode(
+                    next_observations,
+                    next_pixel_observations,
+                    encoder_params,
+                    key=encoder_key,
+                )
             )
             td_targets = self.td_target(next_z, rewards, terminated, key=target_key)
 
